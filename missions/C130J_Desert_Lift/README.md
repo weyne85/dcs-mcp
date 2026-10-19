@@ -15,7 +15,11 @@ CARP-Luftabwurf am DZ → Rückflug und Landung in Nellis.
 | `C130J_Desert_Lift.miz` | Fertige Mission (enthält MOOSE, Skript und Kneeboards) |
 | `C130J_Desert_Lift.lua` | Missionsskript (identisch mit der Version in der `.miz`) |
 | `kneeboards/*.png` | 8 Kneeboard-Seiten (auch in der `.miz` enthalten) |
+| `generator/` | Python-Generator für `.miz` und Kneeboards + Skripttest (siehe Abschnitt 12) |
 | `README.md` | Diese Datei |
+
+Hinweis: Die Repo-Regel „pro Mission nur `.lua` + `README.md`“ ist hier auf ausdrücklichen Wunsch erweitert
+(`.miz`, Kneeboards, Generator).
 
 ## 2. Voraussetzungen und Versionen
 
@@ -173,3 +177,29 @@ HOTEL liegt 12 NM vor Nellis auf der Anfluglinie 21L (207° MAG).
 - [DCSAutoMate (CARP-Automatisierung C-130J)](https://github.com/Arcanum115/DCSAutoMate) · [DCS-BIOS-Fork mit C-130J-CNI-Auslesung](https://github.com/Arcanum115/dcs-bios)
 - Gelände: USGS Elevation Point Query Service · Missweisung: WMM 2025
 - Nellis-Frequenzen: pydcs-Terraindaten (TWR) und DCS-Community-Flugplatzdaten (ILS/TACAN)
+
+---
+
+## 12. Generator (`.miz` und Kneeboards neu erzeugen)
+
+| Datei | Inhalt |
+|---|---|
+| `generator/geo.py` | Koordinaten, Wegpunkte, LZ/DZ-Daten, Missweisung, Hilfsfunktionen |
+| `generator/brief.py` | Briefing-Texte |
+| `generator/kneeboards.py` | Zeichnet die 8 Kneeboard-PNGs nach `kneeboards/` |
+| `generator/gen_mission.py` | Baut `C130J_Desert_Lift.miz` (pydcs), bettet `libs/Moose.lua`, das Skript und die Kneeboards ein |
+| `generator/test/` | Simulierter Durchlauf des Skripts (Lua 5.1 via lupa, DCS/MOOSE als Stubs) |
+
+Schritt für Schritt (vom Repo-Wurzelordner aus):
+
+1. `python -m venv .venv` und aktivieren
+2. `pip install -r missions/C130J_Desert_Lift/generator/requirements.txt`
+3. Daten ändern (meist `geo.py` oder `brief.py`)
+4. `python missions/C130J_Desert_Lift/generator/kneeboards.py` (zuerst, die `.miz` bettet die PNGs ein)
+5. `python missions/C130J_Desert_Lift/generator/gen_mission.py`
+6. `python missions/C130J_Desert_Lift/generator/test/run_test.py` → muss mit `ALLE TESTS BESTANDEN` enden
+
+Hinweise:
+- pydcs gibt ohne DCS-Installation (z. B. unter Linux) viele Warnungen „Couldn't detect any installed DCS World version“ aus. Die sind harmlos.
+- Schriften: DejaVu Sans / Sans Mono. Werden sie nicht gefunden, die TTF-Dateien nach `generator/fonts/` legen.
+- Die Erzeugung ist reproduzierbar: Zwei Läufe ergeben dieselbe `.miz` (Inhalt).
